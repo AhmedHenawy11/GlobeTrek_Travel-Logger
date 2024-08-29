@@ -38,14 +38,39 @@ app.get("/", async (req, res) => {
     });
     //rendering the ejs file with the data
     res.render("index.ejs", { countries: countries, total: countries.length });
-    db.end();
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
-  } finally {
-    db.end();
   }
 });
+
+// POST route
+app.post('/add', async (req, res) => {
+  try {
+    const input = req.body.country;
+
+    const result = await db.query(
+      "SELECT country_code FROM countries WHERE country_name = $1",
+      [input]
+    );
+    
+    if (result.rows.length !== 0) {
+      const data = result.rows[0];
+      const country_code = data.country_code;
+      console.log(country_code);
+      await db.query('INSERT INTO visited_countries (country_code) VALUES ($1)', [country_code]);
+
+      res.redirect("/");
+    }else{
+      console.log("country not found");
+      res.redirect("/");
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+})
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
