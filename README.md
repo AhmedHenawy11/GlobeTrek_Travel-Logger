@@ -1,4 +1,4 @@
-# Travel Tracker App:
+# Travel Logger App:
 - Noedejs
 - Postgresql
 - EJS Templating Engine
