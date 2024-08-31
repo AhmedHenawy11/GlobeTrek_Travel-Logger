@@ -9,10 +9,20 @@
 </head>
 
 <body>
-  <form action="/add" method="post">
-    <input type="text" name="country" autofocus placeholder="<%= locals.error ? error :  'Enter country name'%>">
-    <button type="submit">Add</button>
+  <input type="text" id="country-input" placeholder="Enter country name" autofocus>
+
+  <!-- Form for adding a country -->
+  <form action="/add" method="post" style="display:inline;">
+    <input type="hidden" name="country" id="add-country-input">
+    <button type="submit" onclick="document.getElementById('add-country-input').value = document.getElementById('country-input').value">Add</button>
   </form>
+  
+  <!-- Form for removing a country -->
+  <form action="/remove" method="post" style="display:inline;">
+    <input type="hidden" name="country" id="remove-country-input">
+    <button type="submit" onclick="document.getElementById('remove-country-input').value = document.getElementById('country-input').value">Remove</button>
+  </form>
+  
 
   <section class="ag-canvas">
     <svg class="ag-canvas_svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -374,6 +384,7 @@
   <h2 class="total-count">Total Countries: <%=total%>
   </h2>
   <script>
+
     const country_codes = "<%= countries %>".split(",") 
     console.log(typeof ("<%= countries %>"))
     country_codes.forEach(code => {
