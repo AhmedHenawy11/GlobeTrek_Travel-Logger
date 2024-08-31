@@ -3,9 +3,8 @@ import bodyParser from "body-parser";
 import pg from "pg";
 import dotenv from "dotenv";
 
-// Load environment variables from .env file
+// Configs
 dotenv.config();
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -21,30 +20,40 @@ db.connect();
 
 
 // Middlewares
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 
-// GET route
+// controllers
+
+async function checkVisisted() {
+  console.log("Welcome Home");
+
+  const result = await db.query("SELECT country_code FROM visited_countries");
+  let countries = [];
+  result.rows.forEach((country) => {
+    countries.push(country.country_code);
+  });
+  return countries;
+}
+
+
+
+
+// Routes
+
+// Get all visited countries
 app.get("/", async (req, res) => {
   try {
-    // Getting data from DB
-    const result = await db.query("SELECT country_code FROM visited_countries");
-    const data = result.rows;
-    // formatting the data and storing it into countries variable
-    let countries = [];
-    data.forEach(country => {
-      countries.push(country.country_code);
-    });
-    //rendering the ejs file with the data
+    const countries = await checkVisisted();
     res.render("index.ejs", { countries: countries, total: countries.length });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
 });
-
-// POST route
+// POST route to add new country
 app.post('/add', async (req, res) => {
   try {
     const input = req.body.country;
@@ -71,6 +80,40 @@ app.post('/add', async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 })
+// POST route to remove visited country 
+app.post('/remove', async(req, res) => {
+  const input = req.body.country;
+  console.log(req.body);
+  //STEP 1: get the country code of the input/////////////////////////////////////////////
+  const getCode = await db.query(
+    "SELECT country_code FROM countries WHERE country_name = $1",
+    [input]
+  );
+  
+  if (getCode.rows.length !== 0)
+  {
+    const data = getCode.rows[0];
+    const country_code = data.country_code;
+    console.log(country_code);
+
+  //STEP2 : check if the country in vistid_countries table.
+    const countries = await checkVisisted();
+    if (countries.includes(country_code))
+    {
+        await db.query('DELETE FROM visited_countries WHERE country_code= $1', [country_code]);
+        console.log('country removed')
+        res.redirect("/");
+    }
+
+  }else
+  {
+    console.log("country not found");
+    res.redirect("/");
+  }
+})
+
+
+
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
