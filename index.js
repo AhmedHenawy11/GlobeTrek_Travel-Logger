@@ -38,6 +38,11 @@ async function checkVisisted() {
   return countries;
 }
 
+async function errorHandler (res,error) {
+  console.error(error);
+  const countries = await checkVisisted();
+  res.render("index.ejs",{ countries: countries, total: countries.length, error: error });
+}
 
 
 
@@ -68,16 +73,13 @@ app.post('/add', async (req, res) => {
       const country_code = data.country_code;
       console.log(country_code);
       await db.query('INSERT INTO visited_countries (country_code) VALUES ($1)', [country_code]);
-
       res.redirect("/");
     }else{
-      console.log("country not found");
-      res.redirect("/");
+      errorHandler(res,"Country name doesn't exist");
     }
 
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
+    errorHandler(res,"Country name doesn't exist");
   }
 })
 // POST route to remove visited country 
@@ -107,10 +109,10 @@ app.post('/remove', async(req, res) => {
 
   }else
   {
-    console.log("country not found");
-    res.redirect("/");
+    errorHandler(res,"Country not found");
   }
 })
+
 
 
 
