@@ -14,4 +14,4 @@
 
 
 **view of world map**
-![world](/world.png)
+![world](/world.jpg)
