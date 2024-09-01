@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <input type="text" id="country-input" placeholder="Enter country name" autofocus>
+  <input type="text" id="country-input" placeholder="<%= locals.error ? error: 'Enter country name'  %>" autofocus>
 
   <!-- Form for adding a country -->
   <form action="/add" method="post" style="display:inline;">
